@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   height="600">
+	<s:layout>
+		<s:HorizontalLayout paddingLeft="20" paddingTop="20"/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import com.ItemVO;
+			import com.commands.OpenFileCommand;
+			import com.commands.SaveFileCommand;
+			import mx.graphics.codec.JPEGEncoder;
+			import mx.collections.ArrayCollection;
+			
+			
+			private var _file:File;			
+			[Bindable]
+			private var _dataArr:ArrayCollection = new ArrayCollection()
+			
+			protected function openBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(_file == null)
+				{
+					var tf:File = new File();
+					
+					tf.browseForOpen('open');
+					tf.addEventListener(Event.SELECT , openFileSelect);
+				}
+				else
+				{
+					saveFileSelect(null);
+					_file.browseForOpen('open');
+					_file.addEventListener(Event.SELECT , openFileSelect);
+				}
+				
+			}
+			
+			private function openFileSelect(e:Event):void
+			{
+				_file = e.target as File;
+				var cmd:OpenFileCommand = new OpenFileCommand(_dataArr , _file);
+				cmd.excute();
+			}
+			
+			
+			protected function saveBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(_file == null)
+				{
+					_file = new File();
+					_file.addEventListener(Event.SELECT , saveFileSelect);
+					_file.browseForSave('save');
+				}
+				else
+				{
+					saveFileSelect(null);
+				}
+			}
+			
+			private function saveFileSelect(e:Event):void
+			{
+				var cmd:SaveFileCommand = new SaveFileCommand(_dataArr , _file);
+				cmd.excute();
+			}
+
+			protected function addBtn_clearHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				_dataArr.addItem(itemVo);
+				clearVo();
+			}
+			
+			protected function onRemoveBtnClick(evt:Event):void
+			{
+				var i:int = dataGrid.selectedIndex;
+				if(i >= 0)
+				{
+					_dataArr.removeItemAt(i);
+				}
+			}
+			
+			private function get itemVo():ItemVO
+			{
+				var re:ItemVO = new ItemVO();
+				re.key = keyLab.text;
+				re.value = valueLab.text;
+				return re;
+			}
+			
+			private function clearVo():void
+			{
+				keyLab.text = '';
+				valueLab.text = '';
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Group width="100%" height="100%">
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+		<s:Button id="openBtn" label="开" click="openBtn_clickHandler(event)"/>
+		<s:Button id="saveBtn" label="存" click="saveBtn_clickHandler(event)"/>
+		<s:Label text="key"/>
+		<mx:TextInput id="keyLab"/>
+		<s:Label text="value"/>
+		<mx:TextInput id="valueLab"/>
+		<s:Button id="addBtn" label="增加" click="addBtn_clearHandler(event)"/>
+		<s:Button id="removeBtn" label="删除" click="onRemoveBtnClick(event)"/>
+	</s:Group>
+	<mx:DataGrid id="dataGrid" dataProvider="{_dataArr}" >
+		<mx:columns>
+			<mx:DataGridColumn dataField="key" width="150" draggable="false"/>
+			<mx:DataGridColumn dataField="value" width="150" draggable="false"/>
+		</mx:columns>
+	</mx:DataGrid>
+</s:WindowedApplication>
